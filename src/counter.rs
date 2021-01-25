@@ -50,10 +50,7 @@ impl Parse for Counter {
         let mut values: HashMap<String, i32> = HashMap::new();
         for ls in line_splits {
             let key = String::from(ls[0]);
-            let val = match ls[1].trim().parse::<i32>() {
-                Ok(v) => v,
-                Err(err) => return Err(err.into()),
-            };
+            let val = ls[1].trim().parse::<i32>()?;
             values.insert(key, val);
         }
 

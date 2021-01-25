@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("AMMOUNT")
+            Arg::with_name("AMOUNT")
                 .index(1)
                 .help("The ammount to be added, substracted or set")
                 .takes_value(true),
@@ -45,20 +45,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         .arg(Arg::with_name("set").long("--set").help("Set value"))
         .get_matches();
 
-    let action: Result<Option<i32>, Box<dyn Error>> = match args.value_of("AMMOUNT") {
-        None => Ok(None),
-        Some(val) => {
-            let i: i32 = match val.parse() {
-                Ok(_i) => _i,
-                Err(err) => return Err(err.into()),
-            };
-            Ok(Some(i))
-        }
+    let action = match args.value_of("AMOUNT") {
+        Some(num) => Some(num.parse::<i32>()?),
+        None => None,
     };
-    if action.is_err() {
-        return Err(action.err().unwrap());
-    }
-    let action = action.unwrap();
 
     let mut file = get_file(args.value_of("file").unwrap(), action.is_some())?;
 
@@ -67,13 +57,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut counter = Counter::decode(&buff)?;
 
-    if action.is_some() {
+    if let Some(value) = action {
         let key = match args.value_of("key") {
             Some(v) => String::from(v),
             None => return Err("no key provided".into()),
         };
 
-        let value = action.unwrap();
         if args.is_present("set") {
             counter.set(key, value)
         } else if args.is_present("sub") {
